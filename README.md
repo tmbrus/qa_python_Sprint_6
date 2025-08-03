@@ -12,20 +12,20 @@ qa_python_Sprint_6/
 ├── pytest.ini
 ├── README.md
 ├── requirements.txt
-├── allure-results/ # Папка для хранения результатов тестов (генерируется автоматически)
+├── allure-results/       # Папка для отчётов (в .gitignore)
 ├── locators/
-│ ├── header_footer_locators.py - локаторы элементов шапки и подвала
-│ ├── main_page_locators.py - локаторы главной страницы
-│ └── order_page_locators.py - локаторы страницы заказа
+│   ├── header_footer_locators.py
+│   ├── main_page_locators.py
+│   └── order_page_locators.py
 ├── pages/
-│ ├── base_page.py - базовые методы взаимодействия
-│ ├── header_footer_page.py - работа с элементами шапки/подвала
-│ ├── main_page.py - взаимодействие с главной страницей
-│ └── order_page.py - логика оформления заказа
+│   ├── base_page.py
+│   ├── header_footer_page.py
+│   ├── main_page.py
+│   └── order_page.py
 └── tests/
-├── test_main_page.py - тесты главной страницы (FAQ)
-├── test_order_page.py - тесты оформления заказа
-└── test_redirect.py - тесты редиректов
+    ├── test_main_page.py
+    ├── test_order_page.py
+    └── test_redirect.py
 
 
 Описание тестов

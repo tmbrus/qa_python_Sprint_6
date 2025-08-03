@@ -6,25 +6,26 @@
 ## Структура проекта
 qa_python_Sprint_6/
 ├── .gitignore
-├── README.md
-├── requirements.txt
-├── pytest.ini
 ├── conftest.py
 ├── data.py
 ├── helpers.py
+├── pytest.ini
+├── README.md
+├── requirements.txt
+├── allure-results/ # Папка для хранения результатов тестов (генерируется автоматически)
 ├── locators/
-│   ├── header_footer_locators.py
-│   ├── main_page_locators.py
-│   ├── order_page_locators.py
+│ ├── header_footer_locators.py
+│ ├── main_page_locators.py
+│ └── order_page_locators.py
 ├── pages/
-│   ├── base_page.py
-│   ├── header_footer_page.py
-│   ├── main_page.py
-│   ├── order_page.py
-├── tests/
-│   ├── test_main_page.py
-│   ├── test_order_page.py
-│   ├── test_redirect.py
+│ ├── base_page.py
+│ ├── header_footer_page.py
+│ ├── main_page.py
+│ └── order_page.py
+└── tests/
+├── test_main_page.py
+├── test_order_page.py
+└── test_redirect.py
 
 Описание тестов
 1. Тесты главной страницы (test_main_page.py)

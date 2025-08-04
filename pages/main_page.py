@@ -1,44 +1,97 @@
 import allure
+import time
 from locators.main_page_locators import MainPageLocators
 from pages.base_page import BasePage
 
 
 class MainPage(BasePage):
-    @allure.step('Получаем текст ответа для вопроса {index}')
-    def get_answer_text(self, index):
+    """Класс для работы с главной страницей сервиса."""
+
+    @allure.step('Принять cookies')
+    def accept_cookies(self):
         """
-        Получает текст ответа на вопрос FAQ по указанному индексу
+        Принимает cookies на главной странице.
+        Ожидает появления кнопки и кликает по ней.
+        """
+        self.wait_for_element_clickable(MainPageLocators.COOKIE_BUTTON, timeout=10)
+        self.click_to_element(MainPageLocators.COOKIE_BUTTON)
+
+    @allure.step('Получить текст ответа для вопроса {index}')
+    def get_answer_text(self, index: int) -> str:
+        """
+        Получает текст ответа на вопрос FAQ.
 
         Args:
-            index (int): Номер вопроса в списке FAQ (начиная с 0)
+            index: Номер вопроса (начиная с 0)
 
         Returns:
-            str: Текст ответа на выбранный вопрос
+            Текст ответа
 
-        Steps:
-            1. Формирует локаторы для вопроса и ответа по шаблону
-            2. Скроллит страницу до вопроса для гарантированной видимости элемента
-            3. Кликает по вопросу, чтобы раскрыть ответ
-            4. Получает и возвращает текст ответа
-
-        Example:
-            get_faq_answer_by_index(0) → возвращает текст ответа для первого вопроса
+        Raises:
+            ValueError: Если передан некорректный индекс
+            TimeoutException: Если элементы не найдены
         """
-        # Формируем локатор для вопроса по шаблону с переданным индексом
-        question_locator = self.format_locators(
-            MainPageLocators.QUESTION_TEMPLATE, index)
+        if not isinstance(index, int) or index < 0:
+            raise ValueError("Индекс вопроса должен быть положительным целым числом")
 
-        # Формируем локатор для ответа по шаблону с переданным индексом
-        answer_locator = self.format_locators(
-            MainPageLocators.ANSWER_TEMPLATE, index)
+        # Получаем и кликаем по вопросу
+        question = self._get_question_element(index)
+        self._click_question(question)
 
-        # Скроллим страницу до элемента вопроса (передаем локатор)
-        self.scroll_to_element(question_locator)
+        # Получаем и возвращаем текст ответа
+        return self._get_answer_text(index)
 
-        # Кликаем по вопросу, чтобы раскрыть ответ
-        self.click_to_element(question_locator)
+    @allure.step('Найти вопрос {index}')
+    def _get_question_element(self, index: int):
+        """Находит и возвращает элемент вопроса по индексу."""
+        locator = self.format_locator(MainPageLocators.QUESTION_TEMPLATE, index)
+        self.scroll_to_element(locator)
+        return self.wait_for_element_visible(locator, timeout=15)
 
-        # Получаем текст из элемента ответа
-        answer_text = self.get_element_text(answer_locator)
+    @allure.step('Кликнуть по вопросу')
+    def _click_question(self, question_element):
+        """Выполняет клик по вопросу и ожидает анимацию."""
+        self.click_to_element(question_element)
+        time.sleep(0.5)  # Краткая пауза для анимации раскрытия
 
-        return answer_text
+    @allure.step('Получить текст ответа')
+    def _get_answer_text(self, index: int) -> str:
+        """Находит и возвращает текст ответа."""
+        locator = self.format_locator(MainPageLocators.ANSWER_TEMPLATE, index)
+        answer = self.wait_for_element_visible(locator, timeout=15)
+        return answer.text
+
+    @allure.step('Кликнуть на верхнюю кнопку "Заказать"')
+    def click_header_order_button(self):
+        """
+        Кликает на кнопку 'Заказать' в шапке страницы.
+        Предварительно прокручивает страницу к кнопке.
+        """
+        self.scroll_to_element(MainPageLocators.ORDER_BUTTON_HEADER)
+        self.wait_for_element_clickable(MainPageLocators.ORDER_BUTTON_HEADER)
+        self.click_to_element(MainPageLocators.ORDER_BUTTON_HEADER)
+
+    @allure.step('Кликнуть на центральную кнопку "Заказать"')
+    def click_middle_order_button(self):
+        """
+        Кликает на большую центральную кнопку 'Заказать'.
+        Предварительно прокручивает страницу к кнопке.
+        """
+        self.scroll_to_element(MainPageLocators.ORDER_BUTTON_MIDDLE)
+        self.wait_for_element_clickable(MainPageLocators.ORDER_BUTTON_MIDDLE)
+        self.click_to_element(MainPageLocators.ORDER_BUTTON_MIDDLE)
+
+    @allure.step('Проверить видимость верхней кнопки "Заказать"')
+    def is_header_order_button_visible(self) -> bool:
+        """Проверяет видимость кнопки заказа в шапке."""
+        return self.is_element_present(MainPageLocators.ORDER_BUTTON_HEADER)
+
+    @allure.step('Проверить видимость центральной кнопки "Заказать"')
+    def is_middle_order_button_visible(self) -> bool:
+        """Проверяет видимость большой центральной кнопки заказа."""
+        return self.is_element_present(MainPageLocators.ORDER_BUTTON_MIDDLE)
+
+    @allure.step('Дождаться загрузки главной страницы')
+    def wait_for_page_loaded(self):
+        """Ожидает полной загрузки главной страницы."""
+        self.wait_for_element_visible(MainPageLocators.ORDER_BUTTON_HEADER)

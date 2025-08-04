@@ -1,15 +1,27 @@
 import allure
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 
 class BasePage:
-    """Базовый класс страницы с общими универсальными методами для работы с веб-элементами"""
-
     def __init__(self, driver):
-        """Инициализация базовой страницы с драйвером браузера"""
         self.driver = driver
+
+    def format_locator(self, locator_template, *args):
+        """Форматирует локатор с переданными аргументами."""
+        return (locator_template[0], locator_template[1].format(*args))
+
+    def wait_for_element_clickable(self, locator, timeout=10):
+        """Ждёт, пока элемент станет кликабельным."""
+        return WebDriverWait(self.driver, timeout).until(
+            EC.element_to_be_clickable(locator)
+        )
+
+    def wait_for_element_visible(self, locator, timeout=10):
+        """Ждёт, пока элемент станет видимым."""
+        return WebDriverWait(self.driver, timeout).until(
+            EC.visibility_of_element_located(locator)
+        )
 
     @allure.step('Клик по элементу')
     def click_to_element(self, locator, timeout=20):
@@ -171,22 +183,6 @@ class BasePage:
         except:
             return False
 
-    @allure.step('Принять cookies')
-    def accept_cookies(self, cookie_locator=(By.ID, 'rcc-confirm-button')):
-        """
-        Принимает cookies, если отображается кнопка
-
-        Args:
-            cookie_locator: Локатор кнопки принятия cookies
-                           (по умолчанию (By.ID, 'rcc-confirm-button'))
-        """
-        if self.is_element_present(cookie_locator):
-            self.click_to_element(cookie_locator)
-            allure.attach(
-                self.driver.get_screenshot_as_png(),
-                name="cookies_accepted",
-                attachment_type=allure.attachment_type.PNG
-            )
 
     @allure.step('Сделать скриншот')
     def take_screenshot(self, name="screenshot"):

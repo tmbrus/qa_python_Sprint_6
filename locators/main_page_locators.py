@@ -33,3 +33,17 @@ class MainPageLocators:
                                      ' "Button_Button") and contains('
                                      '@class, "Button_Middle") and contains('
                                      'text(), "Заказать")]')
+
+    # Локатор кнопки принятия cookies
+    COOKIE_BUTTON = (By.ID, 'rcc-confirm-button')
+
+
+
+
+
+
+
+
+
+
+

@@ -1,5 +1,4 @@
 import allure
-
 from selenium.webdriver.common.by import By
 from locators.main_page_locators import MainPageLocators
 from locators.order_page_locators import OrderPageLocators
@@ -52,7 +51,6 @@ class OrderPage(BasePage):
             7. Подтвердить заказ
         """
         self.accept_cookies()
-        self.scroll_to_bottom()
         self.scroll_to_element(OrderPageLocators.ORDER_BUTTON_ALL_SIZES)
         self.click_to_element(OrderPageLocators.ORDER_BUTTON_ALL_SIZES)
         self.fill_first_form(order_dict)
@@ -77,7 +75,7 @@ class OrderPage(BasePage):
         """
         self.scroll_to_element(OrderPageLocators.MAKE_ORDER_BUTTON)
         self.click_to_element(OrderPageLocators.MAKE_ORDER_BUTTON)
-        self.scroll_to_element(OrderPageLocators.YES_BUTTON)
+        self.wait_for_element_visible(OrderPageLocators.YES_BUTTON)
         self.click_to_element(OrderPageLocators.YES_BUTTON)
 
     @allure.step('Заполняем первую форму заказа "Для кого самокат"')
@@ -88,13 +86,12 @@ class OrderPage(BasePage):
         Args:
             order_dict: Словарь с данными клиента (имя, фамилия, адрес и т.д.)
         """
-        self.fill_field(OrderPageLocators.NAME_INPUT, order_dict.get('name'))
-        self.fill_field(OrderPageLocators.SURNAME_INPUT, order_dict.get('surname'))
-        self.fill_field(OrderPageLocators.ADDRESS_INPUT, order_dict.get('address'))
+        self.fill_field(OrderPageLocators.NAME_INPUT, order_dict.get('name', ''))
+        self.fill_field(OrderPageLocators.SURNAME_INPUT, order_dict.get('surname', ''))
+        self.fill_field(OrderPageLocators.ADDRESS_INPUT, order_dict.get('address', ''))
         self.click_to_element(OrderPageLocators.METRO_INPUT)
-        station_locator = OrderPageLocators.METRO_STATION_VISIBLE
-        self.select_metro_station(station_locator, order_dict['metro'])
-        self.fill_field(OrderPageLocators.PHONE_INPUT, order_dict.get('phone'))
+        self.select_metro_station(OrderPageLocators.METRO_STATION_VISIBLE, order_dict.get('metro', ''))
+        self.fill_field(OrderPageLocators.PHONE_INPUT, order_dict.get('phone', ''))
 
     @allure.step('Заполняем вторую форму заказа "Про аренду"')
     def fill_second_form(self, order_dict):
@@ -104,13 +101,10 @@ class OrderPage(BasePage):
         Args:
             order_dict: Словарь с данными аренды (дата, срок, цвет и т.д.)
         """
-        self.set_rental_date(order_dict.get('date'))
-        self.select_rental_period(order_dict.get('duration'))
-        color_locator = (OrderPageLocators.COLOR_BLACK_CHECKBOX
-                         if order_dict.get('color') == 'black' else
-                         OrderPageLocators.COLOR_GREY_CHECKBOX)
-        self.click_to_element(color_locator)
-        self.fill_field(OrderPageLocators.COMMENT_INPUT, order_dict.get('comment'))
+        self.set_rental_date(order_dict.get('date', ''))
+        self.select_rental_period(order_dict.get('duration', ''))
+        self.select_scooter_color(order_dict.get('color', ''))
+        self.fill_field(OrderPageLocators.COMMENT_INPUT, order_dict.get('comment', ''))
 
     @allure.step('Установить дату проката')
     def set_rental_date(self, date_string):
@@ -119,19 +113,27 @@ class OrderPage(BasePage):
         date_field.clear()
         date_field.send_keys(date_string)
         # Клик в любое место, чтобы закрыть календарь
-        self.click_by_tag_name('body')
+        self.click_to_element((By.TAG_NAME, 'body'))
 
     @allure.step('Выбор срока аренды')
     def select_rental_period(self, duration):
         """Выбор продолжительности аренды из выпадающего списка"""
         self.scroll_to_element(OrderPageLocators.RENTAL_DURATION_DROPDOWN)
         self.click_to_element(OrderPageLocators.RENTAL_DURATION_DROPDOWN)
-        duration_option_locator = (
-            By.XPATH,
-            OrderPageLocators.RENTAL_DURATION_OPTION[1].format(duration)
+        duration_option_locator = self.format_locators(
+            OrderPageLocators.RENTAL_DURATION_OPTION,
+            duration
         )
         self.scroll_to_element(duration_option_locator)
         self.click_to_element(duration_option_locator)
+
+    @allure.step('Выбор цвета самоката')
+    def select_scooter_color(self, color):
+        """Выбор цвета самоката"""
+        if color.lower() == 'black':
+            self.click_to_element(OrderPageLocators.COLOR_BLACK_CHECKBOX)
+        else:
+            self.click_to_element(OrderPageLocators.COLOR_GREY_CHECKBOX)
 
     @allure.step('Проверяем наличие окна с информацией о заказе')
     def check_order_status_window(self):
@@ -148,8 +150,9 @@ class OrderPage(BasePage):
             station_name: Название станции для выбора
         """
         self.wait_for_element_visible(locator)
-        stations = self.find_elements_with_wait(locator)
+        stations = self.driver.find_elements(*locator)
         for station in stations:
             if station.text.strip() == station_name:
                 station.click()
-                break
+                return
+        raise ValueError(f"Станция метро '{station_name}' не найдена")

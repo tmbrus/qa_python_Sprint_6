@@ -4,12 +4,15 @@ class URLs:
     Статический класс для хранения всех используемых в тестах URL-адресов
 
     Атрибуты:
+        base_url (str): Базовый URL тестового стенда
         main_page (str): Главная страница сервиса
         order_page (str): Страница оформления заказа
         dzen_page (str): Главная страница Дзена (Яндекс)
     """
-    main_page = 'https://qa-scooter.praktikum-services.ru'
-    order_page = 'https://qa-scooter.praktikum-services.ru/order'
+
+    base_url = 'https://qa-scooter.praktikum-services.ru'
+    main_page = base_url + '/'
+    order_page = base_url + '/order'
     dzen_page = 'https://dzen.ru/?yredirect=true'
 
 

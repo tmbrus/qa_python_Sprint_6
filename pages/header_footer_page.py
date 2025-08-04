@@ -1,5 +1,4 @@
 import allure
-from selenium.webdriver.support.ui import WebDriverWait
 from locators.header_footer_locators import HeaderFooterLocators
 from pages.base_page import BasePage
 
@@ -18,36 +17,20 @@ class HeaderFooterPage(BasePage):
         self.click_to_element(HeaderFooterLocators.SAMOKAT_LOGO)
         return self.current_url
 
-    @allure.step('Переход по логотипу Яндекса')
+    @allure.step('Переход по логотипу Яндекса и переключение на новую вкладку')
     def go_to_yandex_from_logo(self):
         """
-        Переход на страницу Дзена по клику на логотип Яндекса
+        Переход на страницу Дзена по клику на логотип Яндекса: клик + ожидание новой вкладки + переключение
 
         Returns:
             str: URL открытой страницы Dzen
         """
-        # Запоминаем текущее окно и список окон до клика
-        original_window = self.driver.current_window_handle
-        windows_before = self.driver.window_handles
-
-        # Кликаем по логотипу Яндекса
+        original_windows = self.get_windows_handles()
         self.click_to_element(HeaderFooterLocators.YANDEX_LOGO)
-
-        # Ожидаем появления новой вкладки (15 секунд)
-        WebDriverWait(self.driver, 15).until(
-            lambda d: len(d.window_handles) > len(windows_before)
-        )
-
-        # Находим новую вкладку
-        new_window = [x for x in self.driver.window_handles if x not in windows_before][0]
-        self.driver.switch_to.window(new_window)
-
-        # Ожидаем загрузки страницы Dzen (по домену)
-        WebDriverWait(self.driver, 15).until(
-            lambda d: 'dzen.ru' in d.current_url.lower()
-        )
-
-        return self.driver.current_url
+        new_window = self.wait_for_new_window(original_windows, timeout=15)
+        self.switch_to_window(new_window)
+        self.wait_for_url_contains("dzen.ru", timeout=15)
+        return self.current_url
 
     @allure.step('Проверка наличия логотипа Дзена')
     def is_dzen_logo_displayed(self, timeout=10):

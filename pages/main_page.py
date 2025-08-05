@@ -1,5 +1,6 @@
 import allure
-import time
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from locators.main_page_locators import MainPageLocators
 from pages.base_page import BasePage
 
@@ -36,7 +37,7 @@ class MainPage(BasePage):
 
         # Получаем и кликаем по вопросу
         question = self._get_question_element(index)
-        self._click_question(question)
+        self._click_question(question, index)
 
         # Получаем и возвращаем текст ответа
         return self._get_answer_text(index)
@@ -49,10 +50,16 @@ class MainPage(BasePage):
         return self.wait_for_element_visible(locator, timeout=15)
 
     @allure.step('Кликнуть по вопросу')
-    def _click_question(self, question_element):
-        """Выполняет клик по вопросу и ожидает анимацию."""
+    def _click_question(self, question_element, index):
+        """Выполняет клик по вопросу и ожидает анимацию раскрытия ответа."""
+        # Кликаем по вопросу
         self.click_to_element(question_element)
-        time.sleep(0.5)  # Краткая пауза для анимации раскрытия
+
+        # Ожидаем, пока ответ станет видимым
+        # Предполагаем, что ответ имеет тот же индекс, что и вопрос
+        wait = WebDriverWait(self.driver, 10)
+        locator = self.format_locator(MainPageLocators.ANSWER_TEMPLATE, index)
+        wait.until(EC.visibility_of_element_located(locator))
 
     @allure.step('Получить текст ответа')
     def _get_answer_text(self, index: int) -> str:

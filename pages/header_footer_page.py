@@ -30,7 +30,6 @@ class HeaderFooterPage(BasePage):
         new_window = self.wait_for_new_window(original_windows, timeout=15)
         self.switch_to_window(new_window)
         self.wait_for_url_contains("dzen.ru", timeout=15)
-        return self.current_url
 
     @allure.step('Проверка наличия логотипа Дзена')
     def is_dzen_logo_displayed(self, timeout=10):
@@ -43,10 +42,11 @@ class HeaderFooterPage(BasePage):
         Returns:
             bool: True если логотип видим, иначе False
         """
+        from selenium.common.exceptions import TimeoutException
         try:
             return self.wait_for_element_visible(
                 HeaderFooterLocators.DZEN_LOGO,
                 timeout=timeout
             ).is_displayed()
-        except Exception:
+        except TimeoutException:
             return False

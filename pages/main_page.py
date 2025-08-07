@@ -1,6 +1,4 @@
 import allure
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from locators.main_page_locators import MainPageLocators
 from pages.base_page import BasePage
 
@@ -56,10 +54,8 @@ class MainPage(BasePage):
         self.click_to_element(question_element)
 
         # Ожидаем, пока ответ станет видимым
-        # Предполагаем, что ответ имеет тот же индекс, что и вопрос
-        wait = WebDriverWait(self.driver, 10)
         locator = self.format_locator(MainPageLocators.ANSWER_TEMPLATE, index)
-        wait.until(EC.visibility_of_element_located(locator))
+        self.wait_for_element_visible(locator, timeout=10)
 
     @allure.step('Получить текст ответа')
     def _get_answer_text(self, index: int) -> str:
